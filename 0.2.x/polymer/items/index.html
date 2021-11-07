@@ -233,7 +233,7 @@
   
     <li class="md-nav__item">
       <a href="../.." class="md-nav__link">
-        About Polymer
+        Home
       </a>
     </li>
   
@@ -351,11 +351,11 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#manipulation-of-non-virtual-items" class="md-nav__link">
-    Manipulation of non-virtual items
+  <a href="#manipulation-of-non-polymer-items" class="md-nav__link">
+    Manipulation of non-polymer items
   </a>
   
-    <nav class="md-nav" aria-label="Manipulation of non-virtual items">
+    <nav class="md-nav" aria-label="Manipulation of non-polymer items">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -366,8 +366,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#modification-of-virtualclient-side-item" class="md-nav__link">
-    Modification of Virtual/Client side item
+  <a href="#modification-of-client-side-item" class="md-nav__link">
+    Modification of Client side item
   </a>
   
 </li>
@@ -565,11 +565,11 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#manipulation-of-non-virtual-items" class="md-nav__link">
-    Manipulation of non-virtual items
+  <a href="#manipulation-of-non-polymer-items" class="md-nav__link">
+    Manipulation of non-polymer items
   </a>
   
-    <nav class="md-nav" aria-label="Manipulation of non-virtual items">
+    <nav class="md-nav" aria-label="Manipulation of non-polymer items">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -580,8 +580,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#modification-of-virtualclient-side-item" class="md-nav__link">
-    Modification of Virtual/Client side item
+  <a href="#modification-of-client-side-item" class="md-nav__link">
+    Modification of Client side item
   </a>
   
 </li>
@@ -633,31 +633,23 @@ item groups, as they can be used by other mods)</p>
 </div>
 <h2 id="creation-of-items">Creation of items</h2>
 <p>Creation of items is mostly the same as vanilla. Only real difference is that your items need to 
-implement Polymer's <code>VirtualItem</code> interface. It exposes few defaulted methods for manipulation
+implement Polymer's <code>PolymerItem</code> interface. It exposes few defaulted methods for manipulation
 of client side visuals.</p>
 <h3 id="default-implementation">Default implementation</h3>
-<p>For most basic uses, there are default implementation of <code>VirtualItem</code>:</p>
+<p>For most basic uses, there are default implementation of <code>PolymerItem</code>:</p>
 <ul>
-<li><code>BasicVirtualItem</code> - Same as vanilla <code>Item</code>,</li>
-<li><code>VirtualBlockItem</code> - Same as vanilla <code>BlockItem</code>,</li>
-<li><code>VirtualHeadBlockItem</code> - Similar to <code>VirtualBlockItem</code>, but for Blocks implementing <code>VirtualHeadBlock</code> interface.</li>
+<li><code>SimplePolymerItem</code> - Same as vanilla <code>Item</code>,</li>
+<li><code>PolymerSpawnEggItem</code> - Same as vanilla <code>SpawnEggItem</code>,</li>
+<li><code>PolymerBlockItem</code> - Same as vanilla <code>BlockItem</code>,</li>
+<li><code>PolymerHeadBlockItem</code> - Similar to <code>VirtualBlockItem</code>, but for Blocks implementing <code>VirtualHeadBlock</code> interface.</li>
 </ul>
 <h3 id="selecting-visual-item-type">Selecting visual item type.</h3>
-<p>To select visual item type, there are 1 required and 1 optional methods you need to override:</p>
-<ul>
-<li><code>Item getVirtualItem()</code> - It works for everything by default, mostly in cases where ItemStack isn't available,</li>
-<li><code>Item getVirtualItem(ItemStack itemStack, @Nullable ServerPlayerEntity player)</code> - Used in most cases, it includes reference to ItemStack and Player, by default it redirects to <code>getVirtualItem()</code></li>
-</ul>
-<p>Both of these methods can't return null. They can also point to other VirtualItem instance, but keep
+<p>To select visual item type, you need to implement this method
+* <code>Item getPolymerItem(ItemStack itemStack, @Nullable ServerPlayerEntity player)</code></p>
+<p>They can't return nulls. They can also point to other PolymerItem instance, but keep
 in mind to make validation if it's configurable by user!</p>
 <p>Example use:</p>
 <p>Changing client-side item to diamond</p>
-<pre><code>@Override
-public Item getVirtualItem() {
-    return Items.DIAMOND;
-}
-</code></pre>
-<p>Changing client-side item to diamond blocks if there is more than 32 in ItemStack, otherwise to diamonds</p>
 <pre><code>@Override
 public Item getVirtualItem(ItemStack itemStack, @Nullable ServerPlayerEntity player) {
     return itemStack.getCount() &gt; 32 ? Items.DIAMOND_BLOCK : Items.DIAMOND;
@@ -665,61 +657,61 @@ public Item getVirtualItem(ItemStack itemStack, @Nullable ServerPlayerEntity pla
 </code></pre>
 <h3 id="manipulation-of-client-side-itemstack">Manipulation of client side ItemStack</h3>
 <p>Sometimes it's useful to manipulate entire ItemStack, as it allows achieving better effects.
-To do so, you need to override the <code>ItemStack getVirtualItemStack(ItemStack itemStack, @Nullable ServerPlayerEntity player)</code>
+To do so, you need to override the <code>ItemStack getPolymerItemStack(ItemStack itemStack, @Nullable ServerPlayerEntity player)</code>
 method. However, keep in mind that making nbt incorrect might create some issues (for example 
 breaking items in creative mode)!</p>
-<p>Ideally you should modify output of <code>VirtualItem.super.getVirtualItemStack(itemStack, player)</code>,
-<code>ItemHelper.createBasicVirtualItemStack(itemStack, player)</code>
-or <code>ItemHelper.createMinimalVirtualItemStack(itemStack, player)</code>, as they contain all required NBT.</p>
+<p>Ideally you should modify output of <code>PolymerItem.super.getPolymerItemStack(itemStack, player)</code>,
+<code>PolymerItemUtils.createItemStack(itemStack, player)</code>
+or <code>PolymerItemUtils.createMinimalItemStack(itemStack, player)</code>, as they contain all required NBT.</p>
 <p>Example use:</p>
 <p>Adding enchanting glint to item.</p>
 <pre><code>@Override
-public ItemStack getVirtualItemStack(ItemStack itemStack, ServerPlayerEntity player) {
-    ItemStack out = VirtualItem.super.getVirtualItemStack(itemStack, player);
+public ItemStack getPolymerItemStack(ItemStack itemStack, ServerPlayerEntity player) {
+    ItemStack out = PolymerItemUtils.createItemStack(itemStack, player);
     out.addEnchantment(Enchantments.LURE, 0);
     return out;
 }
 </code></pre>
 <h3 id="support-of-modelscustommodeldata">Support of models/CustomModelData</h3>
 <p>You can change custom model data of virtual model by simple 
-overriding <code>int getCustomModelData(ItemStack itemStack, @Nullable ServerPlayerEntity player)</code>.
+overriding <code>int getPolymerCustomModelData(ItemStack itemStack, @Nullable ServerPlayerEntity player)</code>.
 You can return -1 to disable it, or any number above it to set value of it.</p>
 <p>Ideally you should return value created with <a href="/polymer/resource-packs">polymer's resource pack utils</a>, 
 but nothing blocks you from using any other ones.</p>
 <p>Example usage:</p>
 <p>Changing client-side item CustomModelData to previously stored value.</p>
 <pre><code>@Override
-public int getCustomModelData(ItemStack itemStack, @Nullable ServerPlayerEntity player) {
-    // Instance of CMDInfo, see info above
+public int getPolymerCustomModelData(ItemStack itemStack, @Nullable ServerPlayerEntity player) {
+    // Instance of PolymerModelData, see info above
     return this.cmd.value();
 }
 </code></pre>
-<h2 id="manipulation-of-non-virtual-items">Manipulation of non-virtual items</h2>
+<h2 id="manipulation-of-non-polymer-items">Manipulation of non-polymer items</h2>
 <p>Sometimes, you might want to manipulate other vanilla/modded items without implementing
-<code>VirtualItem</code> on them. You can do it by using few events from <code>ItemHelper</code>.</p>
+<code>PolymerItem</code> on them. You can do it by using few events from <code>PolymerItemUtils</code>.</p>
 <h3 id="forcing-items-to-go-through-polymer">Forcing items to go through Polymer</h3>
 <p>To force items to go through polymer's client side item creation, you need to register
-event handler for <code>ItemHelper.VIRTUAL_ITEM_CHECK</code> event. You can register it by using 
-<code>ItemHelper.VIRTUAL_ITEM_CHECK.register(ItemStack -&gt; boolean)</code> lambda.</p>
+event handler for <code>PolymerItemUtils.ITEM_CHECK</code> event. You can register it by using 
+<code>PolymerItemUtils.ITEM_CHECK.register(ItemStack -&gt; boolean)</code> lambda.</p>
 <p>Example use:</p>
 <p>Making every item with string NBT tag of "Test" go through polymer</p>
-<pre><code>ItemHelper.VIRTUAL_ITEM_CHECK.register(
+<pre><code>PolymerItemUtils.ITEM_CHECK.register(
     (itemStack) -&gt; {
         return itemStack.hasNbt() &amp;&amp; itemStack.getNbt().contains(&quot;Test&quot;, NbtElement.STRING_TYPE);
     }
 );
 </code></pre>
-<h3 id="modification-of-virtualclient-side-item">Modification of Virtual/Client side item</h3>
+<h3 id="modification-of-client-side-item">Modification of Client side item</h3>
 <p>After getting vanilla (or for any VirtualItem by default) you can modify any client side item
-with <code>ItemHelper.VIRTUAL_ITEM_MODIFICATION_EVENT</code> event. Just keep in mind doing it incorrectly
+with <code>PolymerItemUtils.ITEM_MODIFICATION_EVENT</code> event. Just keep in mind doing it incorrectly
 can cause issues (mostly around creative mode, but also in case you modify original item).
 You change the client side item by either directly modifying <code>virtual</code> ItemStack 
 or creating new one and returning it. Ideally you should also keep previous nbt, 
 just so it can work nicely, You can register this event by using
-<code>ItemHelper.VIRTUAL_ITEM_MODIFICATION_EVENT.register(((ItemStack original, ItemStack virtual, ServerPlayerEntity player) -&gt; ItemStack)</code> lambda.</p>
+<code>PolymerItemUtils.ITEM_MODIFICATION_EVENT.register(((ItemStack original, ItemStack client, ServerPlayerEntity player) -&gt; ItemStack)</code> lambda.</p>
 <p>Example use:</p>
 <p>Hiding enchantment glint for items with <code>HideEnchantments: 1b</code> nbt tag</p>
-<pre><code>ItemHelper.VIRTUAL_ITEM_MODIFICATION_EVENT.register(
+<pre><code>PolymerItemUtils.ITEM_MODIFICATION_EVENT.register(
     (original, virtual, player) -&gt; {
          if (original.hasNbt() &amp;&amp; original.getNbt().getBoolean(&quot;HideEnchantments&quot;)) {
              virtual.getNbt().remove(&quot;Enchantments&quot;);
@@ -730,7 +722,7 @@ just so it can work nicely, You can register this event by using
 );
 </code></pre>
 <p>Replacing look/name of ItemStack with "Test" NBT tag</p>
-<pre><code>ItemHelper.VIRTUAL_ITEM_MODIFICATION_EVENT.register(
+<pre><code>PolymerItemUtils.ITEM_MODIFICATION_EVENT.register(
     (original, virtual, player) -&gt; {
          if (original.hasNbt() &amp;&amp; original.getNbt().contains(&quot;Test&quot;, NbtElement.STRING_TYPE)) {
              ItemStack out = new ItemStack(Items.DIAMOND_SWORD, virtual.getCount());
@@ -747,7 +739,7 @@ just so it can work nicely, You can register this event by using
 (which happens by default to every VirtualItem).</p>
 <p>Only thing you need to do is just listening to <code>BlockHelper.SERVER_SIDE_MINING_CHECK</code> event.</p>
 <p>Example use:</p>
-<pre><code>BlockHelper.SERVER_SIDE_MINING_CHECK.register(
+<pre><code>PolymerBlockUtils.SERVER_SIDE_MINING_CHECK.register(
     (player, pos, blockState) -&gt; {
          var itemStack = player.getMainHandStack();
          return EnchantmentHelper.getLevel(MyEnchanments.SLOW_MINING, itemStack) &gt; 0;
@@ -756,7 +748,7 @@ just so it can work nicely, You can register this event by using
 </code></pre>
 <h2 id="enchantments">Enchantments</h2>
 <p>The only thing to make your enchantment fully server side is implementation 
-of <code>VirtualObject</code> interface. You also might want to manipulate some things from Polymer Block/ItemHelper events.</p>
+of <code>PolymerObject</code> interface. You also might want to manipulate some things from Polymer Block/Item events.</p>
                 
               
               
@@ -776,7 +768,7 @@ of <code>VirtualObject</code> interface. You also might want to manipulate some 
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../.." class="md-footer__link md-footer__link--prev" aria-label="Previous: About Polymer" rel="prev">
+        <a href="../.." class="md-footer__link md-footer__link--prev" aria-label="Previous: Home" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -785,7 +777,7 @@ of <code>VirtualObject</code> interface. You also might want to manipulate some 
               <span class="md-footer__direction">
                 Previous
               </span>
-              About Polymer
+              Home
             </div>
           </div>
         </a>

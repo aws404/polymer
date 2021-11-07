@@ -233,7 +233,7 @@
   
     <li class="md-nav__item">
       <a href="../.." class="md-nav__link">
-        About Polymer
+        Home
       </a>
     </li>
   
@@ -535,27 +535,27 @@ for more in depth look into how to create entities.
 You can skip most client side specific things, as it won't take effect server side (for example rendering/models)</p>
 </div>
 <h2 id="creation-of-entities">Creation of entities</h2>
-<p>Creation of entities is mostly the same as vanilla. You just need to implement <code>VirtualEntity</code> interface
+<p>Creation of entities is mostly the same as vanilla. You just need to implement <code>PolymerEntity</code> interface
 on your entity's class. It exposes few defaulted methods for manipulation of client side visuals.</p>
 <p>You also need to register your entity type as virtual,
-by using <code>EntityHelper.registerVirtualEntityType(EntityType... types)</code>.</p>
+by using <code>PolymerEntityUtils.registerType(EntityType... types)</code>.</p>
 <h3 id="changing-client-side-entity">Changing client side entity.</h3>
-<p>To select visual entity type, you just need to override <code>EntityType&lt;?&gt; getVirtualEntityType()</code></p>
+<p>To select visual entity type, you just need to override <code>EntityType&lt;?&gt; getPolymerEntityType()</code></p>
 <p>This method can't return null or another EntityType that points to other virtual entity, as it won't work.</p>
 <p>Example use:</p>
 <p>Displaying entity as zombie</p>
 <pre><code>@Override
-public EntityType&lt;?&gt; getVirtualEntityType() {
+public EntityType&lt;?&gt; getPolymerEntityType() {
     return EntityType.ZOMBIE;
 }
 </code></pre>
 <h3 id="modifying-held-items">Modifying held items</h3>
 <p>You most likely want to modify items held by entity, to indicate its type. To do it you need to override
-<code>List&lt;Pair&lt;EquipmentSlot, ItemStack&gt;&gt; getVirtualEntityEquipment(Map&lt;EquipmentSlot, ItemStack&gt; map)</code>.</p>
+<code>List&lt;Pair&lt;EquipmentSlot, ItemStack&gt;&gt; getPolymerVisibleEquipment(Map&lt;EquipmentSlot, ItemStack&gt; map)</code>.</p>
 <p>Example use:</p>
 <p>Displaying real items with helmet replacement.</p>
 <pre><code>@Override
-public List&lt;Pair&lt;EquipmentSlot, ItemStack&gt;&gt; getVirtualEntityEquipment(Map&lt;EquipmentSlot, ItemStack&gt; map) {
+public List&lt;Pair&lt;EquipmentSlot, ItemStack&gt;&gt; ggetPolymerVisibleEquipment(Map&lt;EquipmentSlot, ItemStack&gt; map) {
     List&lt;Pair&lt;EquipmentSlot, ItemStack&gt;&gt; list = new ArrayList&lt;&gt;(map.size());
     for (Map.Entry&lt;EquipmentSlot, ItemStack&gt; entry : map.entrySet()) {
         if (entry.getKey() == EquipmentSlot.HEAD) {
